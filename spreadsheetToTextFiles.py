@@ -1,7 +1,9 @@
-def column_max_row(column_name):
+def column_max_row(sheet, column_name):
     return max((c.row for c in sheet[column_name] if c.value is not None))
 
 import os, openpyxl
+from openpyxl.utils import get_column_letter
+from pathlib import Path
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -10,32 +12,27 @@ wb = openpyxl.load_workbook('resultSpreadsheetFromTxtFiles.xlsx', data_only=True
 sheet = wb.active
 
 
-# Check through a column for the max filled row
+# Create a loop from below to make one file per column: 
 
-# TODO: Step2: Create a loop from below to make one file per column 
+path = Path('textFiles')
 
-textFileA = open('textFileA.txt', 'w')
+if path.exists() == False:
+    path.mkdir()
 
-for i in range(1, column_max_row('A') + 1):
-    # textFileA = open('textFileA.txt', 'a')
-    # If there are an empty line between values, add it into the text file and continue through loop:
-    '''
-    if sheet['A' + str(i)].value == None:
-        textFileA.write('')
-        continue
-    '''
-    cellValue = sheet['A' + str(i)].value
-    print(cellValue)
+for j in range(1, sheet.max_column + 1):
 
-    if cellValue is not None:
-        textFileA.write(cellValue + '\n')
-    else:
-        textFileA.write('\n')    
-    
-    # textFileA.write('\n')
-    # textFileA.close()
+    textFileName = 'textFile' + get_column_letter(j) + '.txt'
+    textFile = open(path/textFileName, 'w')
 
-textFileA.close()
+    for i in range(1, column_max_row(sheet, get_column_letter(j)) + 1):
 
-# print(column_max_row('C'))
+        cellValue = sheet[get_column_letter(j) + str(i)].value
+        print(cellValue) # To see what will be written into the spreadsheet.
 
+        if cellValue is not None:
+            textFile.write(cellValue + '\n')
+        else:
+            textFile.write('\n')    
+        
+
+    textFile.close()
